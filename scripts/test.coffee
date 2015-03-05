@@ -1,106 +1,236 @@
-# Description:
-#   Example scripts for you to examine and try out.
-#
-# Notes:
-#   They are commented out by default, because most of them are pretty silly and
-#   wouldn't be useful and amusing enough for day to day huboting.
-#   Uncomment the ones you want to try and experiment with.
-#
-#   These are from the scripting documentation: https://github.com/github/hubot/blob/master/docs/scripting.md
+# Commands:
+#   JoshBot giphy me <search term> - grabs a random gif from the search term.
+#   JoshBot chz me <search item> - grabs a random gif from cheezburger
+#   JoshBot divide - divide
+#   JoshBot subtract - subracts
+#   JoshBot add - adds
+#   JoshBot multiply - multiplies
+#   JoshBot compliment me (or a User) - compliments a user
+#   JoshBot add compliment - add a compliment to the compliment list
+#   JoshBot insult me (or a User) - insults a user
+#   JoshBot add insult - adds an insult to the insult list
 
-module.exports = (robot) ->
 
-  # robot.hear /badger/i, (msg) ->
-  #   msg.send "Badgers? BADGERS? WE DON'T NEED NO STINKIN BADGERS"
-  #
-  # robot.respond /open the (.*) doors/i, (msg) ->
-  #   doorType = msg.match[1]
-  #   if doorType is "pod bay"
-  #     msg.reply "I'm afraid I can't let you do that."
-  #   else
-  #     msg.reply "Opening #{doorType} doors"
-  #
-  # robot.hear /I like pie/i, (msg) ->
-  #   msg.emote "makes a freshly baked pie"
-  #
-  # lulz = ['lol', 'rofl', 'lmao']
-  #
-  # robot.respond /lulz/i, (msg) ->
-  #   msg.send msg.random lulz
-  #
-  # robot.topic (msg) ->
-  #   msg.send "#{msg.message.text}? That's a Paddlin'"
-  #
-  #
-  # enterReplies = ['Hi', 'Target Acquired', 'Firing', 'Hello friend.', 'Gotcha', 'I see you']
-  # leaveReplies = ['Are you still there?', 'Target lost', 'Searching']
-  #
-  # robot.enter (msg) ->
-  #   msg.send msg.random enterReplies
-  # robot.leave (msg) ->
-  #   msg.send msg.random leaveReplies
-  #
-  # answer = process.env.HUBOT_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING
-  #
-  # robot.respond /what is the answer to the ultimate question of life/, (msg) ->
-  #   unless answer?
-  #     msg.send "Missing HUBOT_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING in environment: please set and try again"
-  #     return
-  #   msg.send "#{answer}, but what is the question?"
-  #
-  # robot.respond /you are a little slow/, (msg) ->
-  #   setTimeout () ->
-  #     msg.send "Who you calling 'slow'?"
-  #   , 60 * 1000
-  #
-  # annoyIntervalId = null
-  #
-  # robot.respond /annoy me/, (msg) ->
-  #   if annoyIntervalId
-  #     msg.send "AAAAAAAAAAAEEEEEEEEEEEEEEEEEEEEEEEEIIIIIIIIHHHHHHHHHH"
-  #     return
-  #
-  #   msg.send "Hey, want to hear the most annoying sound in the world?"
-  #   annoyIntervalId = setInterval () ->
-  #     msg.send "AAAAAAAAAAAEEEEEEEEEEEEEEEEEEEEEEEEIIIIIIIIHHHHHHHHHH"
-  #   , 1000
-  #
-  # robot.respond /unannoy me/, (msg) ->
-  #   if annoyIntervalId
-  #     msg.send "GUYS, GUYS, GUYS!"
-  #     clearInterval(annoyIntervalId)
-  #     annoyIntervalId = null
-  #   else
-  #     msg.send "Not annoying you right now, am I?"
-  #
-  #
-  # robot.router.post '/hubot/chatsecrets/:room', (req, res) ->
-  #   room   = req.params.room
-  #   data   = JSON.parse req.body.payload
-  #   secret = data.secret
-  #
-  #   robot.messageRoom room, "I have a secret: #{secret}"
-  #
-  #   res.send 'OK'
-  #
-  # robot.error (err, msg) ->
-  #   robot.logger.error "DOES NOT COMPUTE"
-  #
-  #   if msg?
-  #     msg.reply "DOES NOT COMPUTE"
-  #
-  # robot.respond /have a soda/i, (msg) ->
-  #   # Get number of sodas had (coerced to a number).
-  #   sodasHad = robot.brain.get('totalSodas') * 1 or 0
-  #
-  #   if sodasHad > 4
-  #     msg.reply "I'm too fizzy.."
-  #
-  #   else
-  #     msg.reply 'Sure!'
-  #
-  #     robot.brain.set 'totalSodas', sodasHad+1
-  #
-  # robot.respond /sleep it off/i, (msg) ->
-  #   robot.brain.set 'totalSodas', 0
-  #   robot.respond 'zzzzz'
+
+
+module.exports = (robot) -> 
+
+    
+  robot.respond /giphy me(.*)/i, (msg) ->
+    search_term = msg.match[1]
+    msg.http("http://api.giphy.com/v1/gifs/search?q=" + search_term + "&api_key=dc6zaTOxFJmzC&limit=15")
+      .get() (err, res, body) ->
+        try
+          json = JSON.parse(body)
+          RandNum = Math.floor(Math.random()*json.data.length)
+          msg.send json.data[RandNum].images.fixed_height.url
+     
+
+
+  robot.respond /chz me(.*)/i, (msg) ->
+    searched_term = msg.match[1]
+    msg.http("http://search.cheezburger.com/api/search?q=" + searched_term + "%20type:gif")    
+      .get() (err, res, body) ->
+        try
+          json = JSON.parse(body)
+          RandNum = Math.floor(Math.random()*json.models.length)
+          msg.send json.models[RandNum].url + ".gif"
+         
+
+  robot.respond /(divide|subtract|add|multiply)(.*)/i, (msg) ->
+    sign = msg.match[1]
+    initial = msg.match[2]
+    RegEx = /[-]?\d+/g
+    ChosenMath = initial.match(RegEx)
+    ChosenMath = ChosenMath.filter(Boolean)
+    if ChosenMath.length <= 1
+      msg.send "I'm no fool. You can't divide a single number. Get on my level"
+      return
+    x = 0
+    total = 0
+    switch sign
+      when "divide"
+        total = ChosenMath[0]
+        while x < (ChosenMath.length - 1)
+          total = total / ChosenMath[x + 1]
+          x++
+      when "subtract"
+        total = ChosenMath[0]
+        while x < (ChosenMath.length - 1)
+          total = total - ChosenMath[x + 1]
+          x++
+      when "multiply"
+        total = 1
+        while x < (ChosenMath.length)
+          if ChosenMath[x] == 0
+            total = 0
+          else
+            total = total * ChosenMath[x]
+            x++
+      when "add"
+        while x < (ChosenMath.length)
+          total = total + parseInt(ChosenMath[x])
+          x++
+    msg.send total
+    
+    
+    
+  robot.respond /compliment (.*)/i, (msg) ->
+    target = msg.match[1]
+    ComplimentData = []
+    fs = require("fs")
+    fileName = "ComplimentList.txt"
+    fs.exists fileName, (exists) ->
+      if exists
+        fs.stat fileName, (error, stats) ->
+           fs.open fileName, "r", (error, fd) ->
+            buffer = new Buffer(stats.size)
+            fs.read fd, buffer, 0, buffer.length, null, (error, bytesRead, buffer) ->
+              data = buffer.toString("utf8", 0, buffer.length)
+              ComplimentData = data.split('\n')
+              randomnum = Math.floor(Math.random()*ComplimentData.length)
+              if target is "me"
+                msg.send "#{msg.message.user.name}, " + ComplimentData[randomnum]
+              else
+                msg.send target + ", " + ComplimentData[randomnum]
+              fs.close fd
+              
+
+  robot.respond /add compliment (.*)/i, (msg) ->
+    comp = msg.match[1]
+    fs = require("fs")
+    fs.appendFile "ComplimentList.txt", "\r\n" + comp, (err) ->
+      throw err if err
+      msg.send "It is saved!"
+      return
+       
+
+  robot.respond /bret bomb(.*)/i, (msg) ->
+    new_line = "\n"   
+  
+    message_string = "http://i.imgur.com/SERXnhF.gif"
+    message_string += new_line
+    message_string += "http://i.imgur.com/SERXnhF.gif"
+    message_string += new_line
+    message_string += "http://i.imgur.com/5Gd83Sy.gif"
+    message_string += new_line
+    message_string += "http://i.imgur.com/5Gd83Sy.gif"
+    message_string += new_line
+    message_string += "http://i.imgur.com/VGHdphI.gif"
+    message_string += new_line
+    message_string += "http://i.imgur.com/SERXnhF.gif"
+    msg.send message_string
+    
+  robot.hear /sad(.*)/i, (msg) ->
+    msg.send "Cheer up! " + "http://i.imgur.com/ug4bv3J.gif"
+    
+  robot.respond /sandwich bomb(.*)/i, (msg) ->
+    new_line = "\n"   
+    randomnum = Math.floor(Math.random()*4)
+    console.log randomnum
+    if randomnum is 0
+      message_string = "http://i.imgur.com/9uiCesi.jpg"
+      message_string += new_line
+      message_string += "http://i.imgur.com/RoV1abo.jpg"
+      message_string += new_line
+      message_string += "http://i.imgur.com/vuEwUMs.jpg"
+      message_string += new_line
+      message_string += "http://i.imgur.com/HRJEguE.jpg"
+      message_string += new_line
+      message_string += "http://i.imgur.com/fQYjE5f.jpg"
+      message_string += new_line
+      message_string += "http://i.imgur.com/CUse5nY.jpg"
+      msg.send message_string    
+    if randomnum is 1
+      message_string = "http://i.imgur.com/9uiCesi.jpg"
+      message_string += new_line
+      message_string += "http://i.imgur.com/RoV1abo.jpg"
+      message_string += new_line
+      message_string += "http://i.imgur.com/vuEwUMs.jpg"
+      message_string += new_line
+      message_string += "http://i.imgur.com/HRJEguE.jpg"
+      message_string += new_line
+      message_string += "http://i.imgur.com/fQYjE5f.jpg"
+      message_string += new_line
+      message_string += "http://i.imgur.com/CUse5nY.jpg"
+      msg.send message_string
+    if randomnum is 2
+      message_string = "http://i.imgur.com/9uiCesi.jpg"
+      message_string += new_line
+      message_string += "http://i.imgur.com/RoV1abo.jpg"
+      message_string += new_line
+      message_string += "http://i.imgur.com/vuEwUMs.jpg"
+      message_string += new_line
+      message_string += "http://i.imgur.com/HRJEguE.jpg"
+      message_string += new_line
+      message_string += "http://i.imgur.com/fQYjE5f.jpg"
+      message_string += new_line
+      message_string += "http://i.imgur.com/CUse5nY.jpg"
+      msg.send message_string
+    if randomnum is 3
+      message_string = "http://i.imgur.com/xzehchs.jpg"
+      message_string += new_line
+      message_string += "http://i.imgur.com/Y9ZQ5ud.jpg"
+      message_string += new_line
+      message_string += "http://i.imgur.com/YiOvJt3.jpg"
+      message_string += new_line
+      message_string += "http://i.imgur.com/CIJfbOR.jpg"
+      message_string += new_line
+      message_string += "http://i.imgur.com/cNvwVxx.jpg"
+      msg.send message_string
+    
+    
+  robot.respond /insult (.*)/i, (msg) ->
+    target = msg.match[1]
+    InsultData = []
+    fs = require("fs")
+    fileName = "InsultList.txt"
+    fs.exists fileName, (exists) ->
+      if exists
+        fs.stat fileName, (error, stats) ->
+           fs.open fileName, "r", (error, fd) ->
+            buffer = new Buffer(stats.size)
+            fs.read fd, buffer, 0, buffer.length, null, (error, bytesRead, buffer) ->
+              data = buffer.toString("utf8", 0, buffer.length)
+              InsultData = data.split('\n')
+              randomnum = InsultData[Math.floor(Math.random()*InsultData.length)]
+              if target is "me"
+                msg.send "#{msg.message.user.name}, " + randomnum
+              else
+                msg.send target + ", " + randomnum
+              fs.close fd 
+
+
+  robot.respond /add insult (.*)/i, (msg) ->
+    comp = msg.match[1]
+    fs = require("fs")
+    fs.appendFile "InsultList.txt", "\r\n" + comp, (err) ->
+      throw err if err
+      msg.send "It is saved!"
+      return      
+
+
+      
+  robot.hear /good morning(.*)/i, (msg) ->
+    target = msg.envelope.user.name
+    MorningData = []
+    fs = require("fs")
+    fileName = "MorningList.txt"
+    fs.exists fileName, (exists) ->
+      if exists
+        fs.stat fileName, (error, stats) ->
+           fs.open fileName, "r", (error, fd) ->
+            buffer = new Buffer(stats.size)
+            fs.read fd, buffer, 0, buffer.length, null, (error, bytesRead, buffer) ->
+              data = buffer.toString("utf8", 0, buffer.length)
+              MorningData = data.split('\n')
+              randomnum = Math.floor(Math.random()*MorningData.length)
+              if target is "me"
+                msg.send "#{msg.message.user.name}, " + MorningData[randomnum]
+              else
+                msg.send target + ", " + MorningData[randomnum]
+              fs.close fd       
+ 
+      
+  
+  
