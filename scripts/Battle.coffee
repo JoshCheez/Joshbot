@@ -3,13 +3,14 @@ module.exports = (robot) ->
 
   robot.respond /attack (.*)/i, (msg) ->
     target = msg.match[1]
-    blacklist_terms = [
+    blacklistterms = [
       'Josh'
       'Joshbot'
     ]
-
-    if target.tolowercase in blacklist_terms
-      msg.send "I will not attack myself or my master!"
+    if target.toLowerCase() == blacklistterms[0].toLowerCase()
+      msg.send "I will not attack my master!"
+    else if target.toLowerCase() == blacklistterms[1].toLowerCase()
+      msg.send "I will not attack myself!"
     else
       x = 0
       delay = (time, fn) ->
@@ -82,7 +83,7 @@ module.exports = (robot) ->
    
       delay 1000, ->
         while battle is 1
-         #Targets's Turn
+          #Targets's Turn
 
           while target.Turn is 1 and battle isnt 0
             #Write target Attack Script	
