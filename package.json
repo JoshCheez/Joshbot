@@ -19,7 +19,7 @@
     "hubot-scripts": "^2.5.16",
     "hubot-shipit": "^0.1.2",
     "hubot-youtube": "^0.1.2",
-    "htmlparser": "1.7.6",
+    "htmlparser": "1.8.0",
     "soupselect": "0.2.0",
     "validator" : "0.4.20"
   },
