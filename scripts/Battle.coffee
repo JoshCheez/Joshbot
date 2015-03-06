@@ -2,7 +2,7 @@ module.exports = (robot) ->
 
 
   robot.respond /attack (.*)/i, (msg) ->
-    target = msg.match[1]    
+    target = msg.match[1]
     x = 0
     delay = (time, fn) ->
       setTimeout fn, time 
