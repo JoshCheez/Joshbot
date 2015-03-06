@@ -1,7 +1,7 @@
 # Description:
 #   The game of Hangman.
 #   Words and definitions are sourced via the Wordnik API. You'll need an API
-#   key from http://developer.wordnik.com/
+#   key from http://developer.wordnik.com/ 
 #
 # Dependencies:
 #   None
