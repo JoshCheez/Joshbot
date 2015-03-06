@@ -2,7 +2,7 @@
 #   The plugin will provide a picture and a link of the daily deal from Steam
 #
 # Dependencies:
-#   "htmlparser": "1.8.0"
+#   "htmlparser": "1.7.6"
 #   "soupselect": "0.2.0"
 #   "validator" : "0.4.20"
 # 
